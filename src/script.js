@@ -226,7 +226,7 @@ async function fetchWeather(lat, lon, city, locationDetails) {
 }
 
 async function fetchLocationByZip(zip) {
-  const url = 'http://api.openweathermap.org/geo/1.0/zip?';
+  const url = 'https://api.openweathermap.org/geo/1.0/zip?';
   try {
     const { data } = await axios.get(url, {
       params: {
@@ -257,7 +257,7 @@ async function fetchLocationByZip(zip) {
 }
 
 async function fetchLocationByCity(city) {
-  const url = 'http://api.openweathermap.org/geo/1.0/direct';
+  const url = 'https://api.openweathermap.org/geo/1.0/direct';
   try {
     const { data } = await axios.get(url, {
       params: {
@@ -300,7 +300,7 @@ async function fetchLocationByCity(city) {
 }
 
 async function fetchLocationByLatLon(lat, lon) {
-  const url = 'http://api.openweathermap.org/geo/1.0/reverse?';
+  const url = 'https://api.openweathermap.org/geo/1.0/reverse?';
   try {
     const { data } = await axios.get(url, {
       params: {
