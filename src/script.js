@@ -304,7 +304,7 @@ async function fetchLocationByZip(zip) {
     }
     const { lat, lon, name, country } = data;
     const locationDetails = `${zip}, ${country}`;
-    fetchWeather(lat, lon, name, locationDetails);
+    await fetchWeather(lat, lon, name, locationDetails);
   } catch (error) {
     if (error.response.status === 404) {
       changeAlertText(
@@ -340,7 +340,7 @@ async function fetchLocationByCity(city) {
       } else {
         locationDetails = country;
       }
-      fetchWeather(lat, lon, name, locationDetails);
+      await fetchWeather(lat, lon, name, locationDetails);
     } else {
       const error = new Error('No city found');
       error.code = 'NOT_FOUND';
@@ -384,7 +384,7 @@ async function fetchLocationByLatLon(lat, lon) {
     } else {
       locationDetails = country;
     }
-    fetchWeather(lat, lon, name, locationDetails);
+    await fetchWeather(lat, lon, name, locationDetails);
   } catch (error) {
     if (error.response.status === 404) {
       changeAlertText(`Nothing found with this lat: ${lat} lon:${lon}`);
