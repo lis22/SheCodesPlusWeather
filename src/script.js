@@ -1,25 +1,54 @@
 const APIKEY = '8944afa6845bd7c413a687258d3211ef';
 
 function isAlertShown() {
-  const myAlert = document.getElementById('alertJS');
+  const myAlert = document.querySelector('#alertJS');
   return myAlert.classList.contains('show');
 }
 
 function changeAlertText(text) {
-  const myAlert = document.getElementById('alertJS');
+  const myAlert = document.querySelector('#alertJS');
   myAlert.innerHTML = text;
 }
 
 function hideAlert() {
-  const myAlert = document.getElementById('alertJS');
+  const myAlert = document.querySelector('#alertJS');
   myAlert.classList.remove('show');
   myAlert.classList.add('hide');
 }
 
 function showAlert() {
-  const myAlert = document.getElementById('alertJS');
+  const myAlert = document.querySelector('#alertJS');
   myAlert.classList.remove('hide');
   myAlert.classList.add('show');
+}
+
+function showWeatherSection() {
+  const mainContent = document.querySelector('#weatherSectionJS');
+  mainContent.classList.remove('hide');
+  mainContent.classList.add('show');
+}
+
+function hideWeatherSection() {
+  const mainContent = document.querySelector('#weatherSectionJS');
+  mainContent.classList.remove('show');
+  mainContent.classList.add('hide');
+}
+
+function isWeatherSectionShown() {
+  const mainContent = document.querySelector('#weatherSectionJS');
+  return mainContent.classList.contains('show');
+}
+
+function showSpinner() {
+  const spinner = document.querySelector('#spinnerJS');
+  spinner.classList.remove('hide');
+  spinner.classList.add('show');
+}
+
+function hideSpinner() {
+  const spinner = document.querySelector('#spinnerJS');
+  spinner.classList.remove('show');
+  spinner.classList.add('hide');
 }
 
 function removeList() {
@@ -51,9 +80,9 @@ function updateCity(city) {
   cityHeading.textContent = city;
 }
 
-function updateCurrentTemperature(temp) {
+function updateCurrentTemperature(temp, tempUnits) {
   const h2 = document.querySelector('#currentTempJS');
-  h2.textContent = temp;
+  h2.innerHTML = `${temp}<sup>${tempUnits}</sup>`;
 }
 
 function updateCurrentIcon(iconId) {
@@ -126,25 +155,42 @@ function setDateTime(formattedDate) {
 }
 
 function toggleTimeConvention() {
-  const heading = document.querySelector('#currentTimeJS');
-  const [day, time, modifier] = heading.textContent.split(' ');
-  let [hour, minutes] = time.split(':').map(Number);
-  const hourCycle = determineTimeConvention();
+  if (isWeatherSectionShown()) {
+    const heading = document.querySelector('#currentTimeJS');
+    const [day, time, modifier] = heading.textContent.split(' ');
+    let [hour, minutes] = time.split(':').map(Number);
+    const hourCycle = determineTimeConvention();
 
-  if (modifier === 'PM' && hour < 12) {
-    hour += 12;
-  } else if (modifier === 'AM' && hour === 12) {
-    hour = 0;
+    if (modifier === 'PM' && hour < 12) {
+      hour += 12;
+    } else if (modifier === 'AM' && hour === 12) {
+      hour = 0;
+    }
+
+    const date = new Date().setHours(hour, minutes);
+    const formattedTime = getTime(hourCycle, date);
+    heading.textContent = `${day} ${formattedTime}`;
   }
-
-  const date = new Date().setHours(hour, minutes);
-  const formattedTime = getTime(hourCycle, date);
-  heading.textContent = `${day} ${formattedTime}`;
+}
+function updateCurrentDescription(currentDescription) {
+  const desc = document.querySelector('#currentDescriptionJS');
+  desc.innerText = currentDescription;
 }
 
-function updateCurrentForcastCard({ temp, city, icon, dateTime, detailsList, timezone, locationDetails }) {
-  updateCurrentTemperature(temp);
+function updateCurrentForcastCard({
+  temp,
+  tempUnits,
+  city,
+  icon,
+  dateTime,
+  detailsList,
+  timezone,
+  currentDescription,
+  locationDetails,
+}) {
+  updateCurrentTemperature(temp, tempUnits);
   updateCity(city);
+  updateCurrentDescription(currentDescription);
   const hourCycle = determineTimeConvention();
   const formattedDate = getFormattedDate(hourCycle, dateTime, timezone);
   setDateTime(formattedDate);
@@ -153,39 +199,55 @@ function updateCurrentForcastCard({ temp, city, icon, dateTime, detailsList, tim
   updateLocationDetails(locationDetails);
 }
 
-function updateWeeklyForecast(forecast) {
+function updateWeeklyForecast({ tempUnits, forecast }) {
   const dayHeader = document.querySelectorAll('.dayJS');
-  const temp = document.querySelectorAll('.tempsForcastJS');
+  const tempMax = document.querySelectorAll('.tempsMaxForecastJS');
+  const tempMin = document.querySelectorAll('.tempsMinForecastJS');
   const icon = document.querySelectorAll('.forecastIconJS');
+  const desc = document.querySelectorAll('.forecastDescriptionJS');
 
   forecast.forEach((day, index) => {
     dayHeader[index].innerText = day.weekday;
-    temp[index].innerText = day.dayTemp;
+    tempMax[index].innerHTML = `${day.maxTemp}<sup>${tempUnits}</sup>`;
+    tempMin[index].innerHTML = `${day.minTemp}<sup>${tempUnits}</sup>`;
+    desc[index].innerText = day.description;
     icon[index].src = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
   });
 }
 
 function transformWeatherData(data, tempUnits, windUnits, city, locationDetails) {
-  const temp = `${Math.round(data.current.temp)} ${tempUnits}`;
+  const temp = Math.round(data.current.temp);
   const timezone = data.timezone;
   const dateTime = new Date(data.current.dt * 1000);
   const currentIcon = data.current.weather[0].icon;
+  const currentDescription = data.current.weather[0].description;
   const detailsList = [
-    data.current.weather[0].main,
     `Humidity: ${data.current.humidity}%`,
     `Cloudiness: ${data.current.clouds}%`,
     `Wind speed: ${data.current.wind_speed} ${windUnits}`,
   ];
   const forecast = [];
-
   data.daily.slice(0, 5).forEach((day) => {
     const weekday = getWeekDay(new Date(day.dt * 1000), timezone);
-    const dayTemp = Math.round(day.temp.day) + tempUnits;
+    const maxTemp = Math.round(day.temp.max);
+    const minTemp = Math.round(day.temp.min);
+    const description = day.weather[0].description;
     const icon = day.weather[0].icon;
-    forecast.push({ weekday, dayTemp, icon });
+    forecast.push({ weekday, maxTemp, minTemp, description, icon });
   });
 
-  return { temp, dateTime, city, icon: currentIcon, detailsList, forecast, timezone, locationDetails };
+  return {
+    temp,
+    tempUnits,
+    dateTime,
+    city,
+    icon: currentIcon,
+    detailsList,
+    currentDescription,
+    forecast,
+    timezone,
+    locationDetails,
+  };
 }
 
 async function fetchWeather(lat, lon, city, locationDetails) {
@@ -208,7 +270,9 @@ async function fetchWeather(lat, lon, city, locationDetails) {
     }
     const weatherData = transformWeatherData(data, tempUnits, windUnits, city, locationDetails);
     updateCurrentForcastCard(weatherData);
-    updateWeeklyForecast(weatherData.forecast);
+    updateWeeklyForecast(weatherData);
+    hideSpinner();
+    showWeatherSection();
   } catch (error) {
     if (error.response.status === 404) {
       changeAlertText(
@@ -221,6 +285,7 @@ async function fetchWeather(lat, lon, city, locationDetails) {
     } else {
       changeAlertText(error.message);
     }
+    hideSpinner();
     showAlert();
   }
 }
@@ -252,6 +317,7 @@ async function fetchLocationByZip(zip) {
     } else {
       changeAlertText(error.message);
     }
+    hideSpinner();
     showAlert();
   }
 }
@@ -281,7 +347,6 @@ async function fetchLocationByCity(city) {
       throw error;
     }
   } catch (error) {
-    console.log(error.code);
     if (error.code === 'NOT_FOUND') {
       changeAlertText(
         `${error.message} for ${city}. <br /> Please search by city name or city name,country code. <br /> Country codes are two digit ISO 3166 country codes.`
@@ -295,6 +360,7 @@ async function fetchLocationByCity(city) {
     } else {
       changeAlertText(error.message);
     }
+    hideSpinner();
     showAlert();
   }
 }
@@ -329,6 +395,7 @@ async function fetchLocationByLatLon(lat, lon) {
     } else {
       changeAlertText(error.message);
     }
+    hideSpinner();
     showAlert();
   }
 }
@@ -341,6 +408,9 @@ function containsNumbers(input) {
 function getUserInput(event) {
   event.preventDefault();
   const input = document.querySelector('#userInputJS').value.trim();
+
+  hideWeatherSection();
+  showSpinner();
 
   if (input) {
     if (containsNumbers(input)) {
@@ -357,7 +427,7 @@ function setTemps(conversionFn, tempUnits) {
   temps.forEach((element) => {
     const temp = element.innerText.split('°')[0];
     const convertedTemp = conversionFn(temp);
-    element.textContent = convertedTemp + tempUnits;
+    element.innerHTML = `${convertedTemp}<sup>${tempUnits}</sup>`;
   });
 }
 
@@ -370,20 +440,25 @@ function convertToFahrenheit(temp) {
 }
 
 function toggleTempUnits() {
-  const toggle = document.querySelector('#tempUnitsSwitchJS');
-  if (toggle.checked) {
-    setTemps(convertToFahrenheit, '°F');
-  } else {
-    setTemps(convertToCelsius, '°C');
+  if (isWeatherSectionShown()) {
+    const toggle = document.querySelector('#tempUnitsSwitchJS');
+    if (toggle.checked) {
+      setTemps(convertToFahrenheit, '°F');
+    } else {
+      setTemps(convertToCelsius, '°C');
+    }
   }
 }
 
 function geoSucess(position) {
+  hideWeatherSection();
+  showSpinner();
   fetchLocationByLatLon(position.coords.latitude, position.coords.longitude);
 }
 
 function geoError() {
   changeAlertText('We could not get your location. Please make sure to allow geolocation in your browser');
+  hideSpinner();
   showAlert();
 }
 
@@ -392,6 +467,7 @@ function getGeoLocation() {
     navigator.geolocation.getCurrentPosition(geoSucess, geoError);
   } else {
     changeAlertText('Geolocation is not supported by this browser');
+    hideSpinner();
     showAlert();
   }
 }
