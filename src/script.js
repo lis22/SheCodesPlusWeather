@@ -292,6 +292,9 @@ async function fetchWeather(lat, lon, city, locationDetails) {
 
 async function fetchLocationByZip(zip) {
   const url = 'https://api.openweathermap.org/geo/1.0/zip?';
+  hideWeatherSection();
+  showSpinner();
+
   try {
     const { data } = await axios.get(url, {
       params: {
@@ -306,7 +309,11 @@ async function fetchLocationByZip(zip) {
     const locationDetails = `${zip}, ${country}`;
     await fetchWeather(lat, lon, name, locationDetails);
   } catch (error) {
-    if (error.response.status === 404) {
+    if (error.response.status === 400) {
+      changeAlertText(
+        `No result found for ${zip}. <br /> Please search by zipcode in US or zipcode,country code. <br /> Country codes are two digit ISO 3166 country codes.`
+      );
+    } else if (error.response.status === 404) {
       changeAlertText(
         `No result found for ${zip}. <br /> Please search by zipcode in US or zipcode,country code. <br /> Country codes are two digit ISO 3166 country codes.`
       );
@@ -324,6 +331,9 @@ async function fetchLocationByZip(zip) {
 
 async function fetchLocationByCity(city) {
   const url = 'https://api.openweathermap.org/geo/1.0/direct';
+  hideWeatherSection();
+  showSpinner();
+
   try {
     const { data } = await axios.get(url, {
       params: {
@@ -367,6 +377,9 @@ async function fetchLocationByCity(city) {
 
 async function fetchLocationByLatLon(lat, lon) {
   const url = 'https://api.openweathermap.org/geo/1.0/reverse?';
+  hideWeatherSection();
+  showSpinner();
+
   try {
     const { data } = await axios.get(url, {
       params: {
@@ -404,21 +417,27 @@ function containsNumbers(input) {
   const matches = input.match(/\d+/g);
   return matches !== null;
 }
-
+function removeSpacesBetweenComma(input) {
+  return input.replace(/\s*,\s*/g, ',');
+}
 function getUserInput(event) {
   event.preventDefault();
-  const input = document.querySelector('#userInputJS').value.trim();
-
-  hideWeatherSection();
-  showSpinner();
+  let input = document.querySelector('#userInputJS').value.trim();
 
   if (input) {
+    if (input.includes(',')) {
+      input = removeSpacesBetweenComma(input);
+    }
     if (containsNumbers(input)) {
       fetchLocationByZip(input);
     } else {
       fetchLocationByCity(input);
     }
+  } else {
+    changeAlertText('Please enter a city or zipcode');
+    showAlert();
   }
+
   document.querySelector('#userInputJS').value = '';
 }
 
@@ -451,8 +470,6 @@ function toggleTempUnits() {
 }
 
 function geoSucess(position) {
-  hideWeatherSection();
-  showSpinner();
   fetchLocationByLatLon(position.coords.latitude, position.coords.longitude);
 }
 
