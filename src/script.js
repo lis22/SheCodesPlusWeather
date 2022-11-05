@@ -51,30 +51,6 @@ function hideSpinner() {
   spinner.classList.add('hide');
 }
 
-function removeList() {
-  const list = document.querySelector('#weatherDetailsListJS');
-  if (list.childNodes.length !== 0) {
-    list.innerHTML = '';
-  }
-}
-
-function addToList(text) {
-  const listItem = document.createElement('li');
-  const textNode = document.createTextNode(text);
-  const list = document.querySelector('#weatherDetailsListJS');
-
-  listItem.classList.add('list-group-item');
-  listItem.appendChild(textNode);
-  list.appendChild(listItem);
-}
-
-function updateList(list) {
-  removeList();
-  list.forEach((element) => {
-    addToList(element);
-  });
-}
-
 function updateCity(city) {
   const cityHeading = document.querySelector('#currentCityJS');
   cityHeading.textContent = city;
@@ -104,11 +80,11 @@ function determineUnits() {
   if (toggle.checked) {
     apiUnits = 'imperial';
     tempUnits = '°F';
-    windUnits = 'miles/hour';
+    windUnits = 'mph';
   } else {
     apiUnits = 'metric';
     tempUnits = '°C';
-    windUnits = 'meter/sec';
+    windUnits = 'm/s';
   }
   return { apiUnits, tempUnits, windUnits };
 }
@@ -156,20 +132,23 @@ function setDateTime(formattedDate) {
 
 function toggleTimeConvention() {
   if (isWeatherSectionShown()) {
-    const heading = document.querySelector('#currentTimeJS');
-    const [day, time, modifier] = heading.textContent.split(' ');
-    let [hour, minutes] = time.split(':').map(Number);
-    const hourCycle = determineTimeConvention();
+    const dates = document.querySelectorAll('.date');
 
-    if (modifier === 'PM' && hour < 12) {
-      hour += 12;
-    } else if (modifier === 'AM' && hour === 12) {
-      hour = 0;
-    }
+    dates.forEach((element) => {
+      const [day, time, modifier] = element.textContent.split(' ');
+      let [hour, minutes] = time.split(':').map(Number);
+      const hourCycle = determineTimeConvention();
 
-    const date = new Date().setHours(hour, minutes);
-    const formattedTime = getTime(hourCycle, date);
-    heading.textContent = `${day} ${formattedTime}`;
+      if (modifier === 'PM' && hour < 12) {
+        hour += 12;
+      } else if (modifier === 'AM' && hour === 12) {
+        hour = 0;
+      }
+
+      const date = new Date().setHours(hour, minutes);
+      const formattedTime = getTime(hourCycle, date);
+      element.textContent = `${day} ${formattedTime}`;
+    });
   }
 }
 function updateCurrentDescription(currentDescription) {
@@ -177,26 +156,59 @@ function updateCurrentDescription(currentDescription) {
   desc.innerText = currentDescription;
 }
 
+function updateHumidity(humidity) {
+  const humidityEl = document.querySelector('#humidityJS');
+  humidityEl.innerText = `Humidity: ${humidity}`;
+}
+
+function updateClouds(cloud) {
+  const cloudEl = document.querySelector('#cloudJS');
+  cloudEl.innerText = `Cloudiness: ${cloud}`;
+}
+
+function updateWindSpeed(windspeed) {
+  const windspeedEl = document.querySelector('#windspeedJS');
+  windspeedEl.innerText = `Wind speed: ${windspeed}`;
+}
+
+function updateSunset(sunset) {
+  const sunsetEl = document.querySelector('#sunsetJS');
+  sunsetEl.innerText = `${sunset}`;
+}
+
+function updateSunrise(sunrise) {
+  const sunriseEl = document.querySelector('#sunriseJS');
+  sunriseEl.innerText = `${sunrise}`;
+}
+
 function updateCurrentForcastCard({
   temp,
   tempUnits,
   city,
   icon,
+  sunrise,
+  sunset,
   dateTime,
-  detailsList,
   timezone,
+  windspeed,
+  humidity,
+  clouds,
   currentDescription,
   locationDetails,
 }) {
+  updateCurrentIcon(icon);
   updateCurrentTemperature(temp, tempUnits);
   updateCity(city);
   updateCurrentDescription(currentDescription);
   const hourCycle = determineTimeConvention();
   const formattedDate = getFormattedDate(hourCycle, dateTime, timezone);
   setDateTime(formattedDate);
-  updateCurrentIcon(icon);
-  updateList(detailsList);
+  updateSunrise(sunrise);
+  updateSunset(sunset);
   updateLocationDetails(locationDetails);
+  updateWindSpeed(windspeed);
+  updateClouds(clouds);
+  updateHumidity(humidity);
 }
 
 function updateWeeklyForecast({ tempUnits, forecast }) {
@@ -214,18 +226,24 @@ function updateWeeklyForecast({ tempUnits, forecast }) {
     icon[index].src = `https://openweathermap.org/img/wn/${day.icon}@2x.png`;
   });
 }
+function hasSunRose(utcNow, utcSunRise, utcSunset) {
+  return utcNow > utcSunRise && utcNow < utcSunset;
+}
 
 function transformWeatherData(data, tempUnits, windUnits, city, locationDetails) {
   const temp = Math.round(data.current.temp);
   const timezone = data.timezone;
+  const hourCycle = determineTimeConvention();
+  const isSunOut = hasSunRose(data.current.dt, data.current.sunrise, data.current.sunset);
   const dateTime = new Date(data.current.dt * 1000);
+  const sunrise = getFormattedDate(hourCycle, new Date(data.current.sunrise * 1000), timezone);
+  const sunset = getFormattedDate(hourCycle, new Date(data.current.sunset * 1000), timezone);
   const currentIcon = data.current.weather[0].icon;
   const currentDescription = data.current.weather[0].description;
-  const detailsList = [
-    `Humidity: ${data.current.humidity}%`,
-    `Cloudiness: ${data.current.clouds}%`,
-    `Wind speed: ${data.current.wind_speed} ${windUnits}`,
-  ];
+  const humidity = `${data.current.humidity}%`;
+  const clouds = `${data.current.clouds}%`;
+  const windspeed = `${data.current.wind_speed} ${windUnits}`;
+
   const forecast = [];
   data.daily.slice(0, 5).forEach((day) => {
     const weekday = getWeekDay(new Date(day.dt * 1000), timezone);
@@ -242,12 +260,25 @@ function transformWeatherData(data, tempUnits, windUnits, city, locationDetails)
     dateTime,
     city,
     icon: currentIcon,
-    detailsList,
+    isSunOut,
+    sunrise,
+    sunset,
+    humidity,
+    clouds,
+    windspeed,
     currentDescription,
     forecast,
     timezone,
     locationDetails,
   };
+}
+
+function changeTheme(isSunOut) {
+  if (isSunOut) {
+    document.body.setAttribute('data-theme', 'light');
+  } else {
+    document.body.setAttribute('data-theme', 'dark');
+  }
 }
 
 async function fetchWeather(lat, lon, city, locationDetails) {
@@ -269,6 +300,8 @@ async function fetchWeather(lat, lon, city, locationDetails) {
       hideAlert();
     }
     const weatherData = transformWeatherData(data, tempUnits, windUnits, city, locationDetails);
+    console.log(weatherData);
+    changeTheme(weatherData.isSunOut);
     updateCurrentForcastCard(weatherData);
     updateWeeklyForecast(weatherData);
     hideSpinner();
