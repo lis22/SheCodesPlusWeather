@@ -300,7 +300,6 @@ async function fetchWeather(lat, lon, city, locationDetails) {
       hideAlert();
     }
     const weatherData = transformWeatherData(data, tempUnits, windUnits, city, locationDetails);
-    console.log(weatherData);
     changeTheme(weatherData.isSunOut);
     updateCurrentForcastCard(weatherData);
     updateWeeklyForecast(weatherData);
