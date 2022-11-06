@@ -1,74 +1,27 @@
 const APIKEY = '8944afa6845bd7c413a687258d3211ef';
 
-function isAlertShown() {
-  const myAlert = document.querySelector('#alertJS');
-  return myAlert.classList.contains('show');
+function hideElement(id) {
+  document.querySelector(id).style.display = 'none';
 }
 
-function changeAlertText(text) {
-  const myAlert = document.querySelector('#alertJS');
-  myAlert.innerHTML = text;
+function showElement(id) {
+  document.querySelector(id).style.display = 'block';
 }
 
-function hideAlert() {
-  const myAlert = document.querySelector('#alertJS');
-  myAlert.classList.remove('show');
-  myAlert.classList.add('hide');
+function isElementShown(id) {
+  return document.querySelector(id).style.display === 'block';
 }
 
-function showAlert() {
-  const myAlert = document.querySelector('#alertJS');
-  myAlert.classList.remove('hide');
-  myAlert.classList.add('show');
+function changeElementText(id, text) {
+  document.querySelector(id).innerText = text;
 }
 
-function showWeatherSection() {
-  const mainContent = document.querySelector('#weatherSectionJS');
-  mainContent.classList.remove('hide');
-  mainContent.classList.add('show');
+function changeElementHTML(id, text) {
+  document.querySelector(id).innerHTML = text;
 }
 
-function hideWeatherSection() {
-  const mainContent = document.querySelector('#weatherSectionJS');
-  mainContent.classList.remove('show');
-  mainContent.classList.add('hide');
-}
-
-function isWeatherSectionShown() {
-  const mainContent = document.querySelector('#weatherSectionJS');
-  return mainContent.classList.contains('show');
-}
-
-function showSpinner() {
-  const spinner = document.querySelector('#spinnerJS');
-  spinner.classList.remove('hide');
-  spinner.classList.add('show');
-}
-
-function hideSpinner() {
-  const spinner = document.querySelector('#spinnerJS');
-  spinner.classList.remove('show');
-  spinner.classList.add('hide');
-}
-
-function updateCity(city) {
-  const cityHeading = document.querySelector('#currentCityJS');
-  cityHeading.textContent = city;
-}
-
-function updateCurrentTemperature(temp, tempUnits) {
-  const h2 = document.querySelector('#currentTempJS');
-  h2.innerHTML = `${temp}<sup>${tempUnits}</sup>`;
-}
-
-function updateCurrentIcon(iconId) {
-  const icon = document.querySelector('#currentIconJS');
-  icon.src = `https://openweathermap.org/img/wn/${iconId}@4x.png`;
-}
-
-function updateLocationDetails(locationDetails) {
-  const locationHeading = document.querySelector('#locationDetailsJS');
-  locationHeading.textContent = locationDetails;
+function changeIcon(id, iconId) {
+  document.querySelector(id).src = `https://openweathermap.org/img/wn/${iconId}@4x.png`;
 }
 
 function determineUnits() {
@@ -91,7 +44,7 @@ function determineUnits() {
 
 function getTime(hourCycle, date) {
   return new Intl.DateTimeFormat('default', {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
     hourCycle,
   }).format(date);
@@ -100,7 +53,7 @@ function getTime(hourCycle, date) {
 function getFormattedDate(hourCycle, date, timeZone) {
   return new Intl.DateTimeFormat('default', {
     weekday: 'long',
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
     hourCycle,
     timeZone,
@@ -125,16 +78,11 @@ function determineTimeConvention() {
   return hourCycle;
 }
 
-function setDateTime(formattedDate) {
-  const dateTime = document.querySelector('#currentTimeJS');
-  dateTime.textContent = formattedDate;
-}
-
 function toggleTimeConvention() {
-  if (isWeatherSectionShown()) {
+  if (isElementShown('#weatherSectionJS')) {
     const dates = document.querySelectorAll('.date');
 
-    dates.forEach((element) => {
+    dates.forEach((element, index) => {
       const [day, time, modifier] = element.textContent.split(' ');
       let [hour, minutes] = time.split(':').map(Number);
       const hourCycle = determineTimeConvention();
@@ -147,41 +95,12 @@ function toggleTimeConvention() {
 
       const date = new Date().setHours(hour, minutes);
       const formattedTime = getTime(hourCycle, date);
-      element.textContent = `${day} ${formattedTime}`;
+      dates[index].textContent = `${day} ${formattedTime}`;
     });
   }
 }
-function updateCurrentDescription(currentDescription) {
-  const desc = document.querySelector('#currentDescriptionJS');
-  desc.innerText = currentDescription;
-}
 
-function updateHumidity(humidity) {
-  const humidityEl = document.querySelector('#humidityJS');
-  humidityEl.innerText = `Humidity: ${humidity}`;
-}
-
-function updateClouds(cloud) {
-  const cloudEl = document.querySelector('#cloudJS');
-  cloudEl.innerText = `Cloudiness: ${cloud}`;
-}
-
-function updateWindSpeed(windspeed) {
-  const windspeedEl = document.querySelector('#windspeedJS');
-  windspeedEl.innerText = `Wind speed: ${windspeed}`;
-}
-
-function updateSunset(sunset) {
-  const sunsetEl = document.querySelector('#sunsetJS');
-  sunsetEl.innerText = `${sunset}`;
-}
-
-function updateSunrise(sunrise) {
-  const sunriseEl = document.querySelector('#sunriseJS');
-  sunriseEl.innerText = `${sunrise}`;
-}
-
-function updateCurrentForcastCard({
+function updateCurrentWeather({
   temp,
   tempUnits,
   city,
@@ -196,19 +115,20 @@ function updateCurrentForcastCard({
   currentDescription,
   locationDetails,
 }) {
-  updateCurrentIcon(icon);
-  updateCurrentTemperature(temp, tempUnits);
-  updateCity(city);
-  updateCurrentDescription(currentDescription);
   const hourCycle = determineTimeConvention();
   const formattedDate = getFormattedDate(hourCycle, dateTime, timezone);
-  setDateTime(formattedDate);
-  updateSunrise(sunrise);
-  updateSunset(sunset);
-  updateLocationDetails(locationDetails);
-  updateWindSpeed(windspeed);
-  updateClouds(clouds);
-  updateHumidity(humidity);
+
+  changeIcon('#currentIconJS', icon);
+  changeElementText('#currentDescriptionJS', currentDescription);
+  changeElementText('#currentCityJS', city);
+  changeElementText('#locationDetailsJS', locationDetails);
+  changeElementHTML('#currentTempJS', `${temp}<sup>${tempUnits}</sup>`);
+  changeElementText('#currentTimeJS', formattedDate);
+  changeElementText('#sunriseJS', sunrise);
+  changeElementText('#sunsetJS', sunset);
+  changeElementText('#humidityJS', humidity);
+  changeElementText('#cloudJS', clouds);
+  changeElementText('#windspeedJS', windspeed);
 }
 
 function updateWeeklyForecast({ tempUnits, forecast }) {
@@ -283,10 +203,12 @@ function changeTheme(isSunOut) {
 
 async function fetchWeather(lat, lon, city, locationDetails) {
   const url = 'https://api.openweathermap.org/data/2.5/onecall?';
+  const alertId = '#alertJS';
+  let data;
   const { apiUnits, tempUnits, windUnits } = determineUnits();
 
   try {
-    const { data } = await axios.get(url, {
+    ({ data } = await axios.get(url, {
       params: {
         lat,
         lon,
@@ -294,155 +216,172 @@ async function fetchWeather(lat, lon, city, locationDetails) {
         appid: APIKEY,
         exclude: 'minutely,hourly,alerts',
       },
-    });
-
-    if (isAlertShown()) {
-      hideAlert();
-    }
-    const weatherData = transformWeatherData(data, tempUnits, windUnits, city, locationDetails);
-    changeTheme(weatherData.isSunOut);
-    updateCurrentForcastCard(weatherData);
-    updateWeeklyForecast(weatherData);
-    hideSpinner();
-    showWeatherSection();
+    }));
   } catch (error) {
     if (error.response.status === 404) {
-      changeAlertText(
-        `Nothing found when searching for city. <br /> Searched with this lat: ${lat} lon:${lon} city:${city}`
+      changeElementText(
+        alertId,
+        `Nothing found when searching for city. Searched with this lat: ${lat} lon:${lon} city:${city}`
       );
     } else if (error.response.status === 429) {
-      changeAlertText('Open Weather API has too many calls from this key. Try another key.');
+      changeElementText(alertId, 'Open Weather API has too many calls from this key. Try another key.');
     } else if (error.response.status === 401) {
-      changeAlertText('The Open Weather API key is not valid. Try another key.');
+      changeElementText(alertId, 'The Open Weather API key is not valid. Try another key.');
     } else {
-      changeAlertText(error.message);
+      changeElementText(alertId, error.message);
     }
-    hideSpinner();
-    showAlert();
+    hideElement('#spinnerJS');
+    showElement(alertId);
   }
+
+  if (isElementShown(alertId)) {
+    hideElement(alertId);
+  }
+  const weatherData = transformWeatherData(data, tempUnits, windUnits, city, locationDetails);
+  changeTheme(weatherData.isSunOut);
+  updateCurrentWeather(weatherData);
+  updateWeeklyForecast(weatherData);
+  hideElement('#spinnerJS');
+  showElement('#weatherSectionJS');
 }
 
 async function fetchLocationByZip(zip) {
   const url = 'https://api.openweathermap.org/geo/1.0/zip?';
-  hideWeatherSection();
-  showSpinner();
+  const alertId = '#alertJS';
+  let data;
+
+  hideElement('#weatherSectionJS');
+  showElement('#spinnerJS');
 
   try {
-    const { data } = await axios.get(url, {
+    ({ data } = await axios.get(url, {
       params: {
         zip,
         appid: APIKEY,
       },
-    });
-    if (zip.includes(',')) {
-      zip = zip.split(',')[0];
-    }
-    const { lat, lon, name, country } = data;
-    const locationDetails = `${zip}, ${country}`;
-    await fetchWeather(lat, lon, name, locationDetails);
+    }));
   } catch (error) {
     if (error.response.status === 400) {
-      changeAlertText(
-        `No result found for ${zip}. <br /> Please search by zipcode in US or zipcode,country code. <br /> Country codes are two digit ISO 3166 country codes.`
+      changeElementText(
+        alertId,
+        `No result found for ${zip}. Please search by zipcode in US or zipcode,country code. Country codes are two digit ISO 3166 country codes.`
       );
     } else if (error.response.status === 404) {
-      changeAlertText(
-        `No result found for ${zip}. <br /> Please search by zipcode in US or zipcode,country code. <br /> Country codes are two digit ISO 3166 country codes.`
+      changeElementText(
+        alertId,
+        `No result found for ${zip}. Please search by zipcode in US or zipcode,country code. Country codes are two digit ISO 3166 country codes.`
       );
     } else if (error.response.status === 429) {
-      changeAlertText('Open Weather API has too many calls from this key. Try another key.');
+      changeElementText(alertId, 'Open Weather API has too many calls from this key. Try another key.');
     } else if (error.response.status === 401) {
-      changeAlertText('The Open Weather API key is not valid. Try another key.');
+      changeElementText(alertId, 'The Open Weather API key is not valid. Try another key.');
     } else {
-      changeAlertText(error.message);
+      changeElementText(alertId, error.message);
     }
-    hideSpinner();
-    showAlert();
+    hideElement('#spinnerJS');
+    showElement(alertId);
   }
+  if (zip.includes(',')) {
+    zip = zip.split(',')[0];
+  }
+  const { lat, lon, name, country } = data;
+  const locationDetails = `${zip}, ${country}`;
+  await fetchWeather(lat, lon, name, locationDetails);
 }
 
 async function fetchLocationByCity(city) {
   const url = 'https://api.openweathermap.org/geo/1.0/direct';
-  hideWeatherSection();
-  showSpinner();
+  const alertId = '#alertJS';
+  let data;
+
+  hideElement('#weatherSectionJS');
+  showElement('#spinnerJS');
 
   try {
-    const { data } = await axios.get(url, {
+    ({ data } = await axios.get(url, {
       params: {
         q: city,
         appid: APIKEY,
         limit: 1,
       },
-    });
-    if (data.length > 0) {
-      const { state = 'unknown', country, lat, lon, name } = data[0];
-      let locationDetails;
-      if (state !== 'unknown') {
-        locationDetails = `${state}, ${country}`;
-      } else {
-        locationDetails = country;
-      }
-      await fetchWeather(lat, lon, name, locationDetails);
-    } else {
-      const error = new Error('No city found');
-      error.code = 'NOT_FOUND';
-      throw error;
-    }
+    }));
   } catch (error) {
-    if (error.code === 'NOT_FOUND') {
-      changeAlertText(
-        `${error.message} for ${city}. <br /> Please search by city name or city name,country code. <br /> Country codes are two digit ISO 3166 country codes.`
+    if (error.response.status === 400) {
+      changeElementText(
+        alertId,
+        `Nothing found while searching for ${city}. Please search by city name or city name,country code. Country codes are two digit ISO 3166 country codes.`
       );
     } else if (error.response.status === 404) {
-      changeAlertText(`Nothing found while searching for ${city}`);
+      changeElementText(alertId, `Nothing found while searching for ${city}`);
     } else if (error.response.status === 429) {
-      changeAlertText('Open Weather API has too many calls from this key. Try another key.');
+      changeElementText(alertId, 'Open Weather API has too many calls from this key. Try another key.');
     } else if (error.response.status === 401) {
-      changeAlertText('The Open Weather API key is not valid. Try another key.');
+      changeElementText(alertId, 'The Open Weather API key is not valid. Try another key.');
     } else {
-      changeAlertText(error.message);
+      changeElementText(alertId, error.message);
     }
-    hideSpinner();
-    showAlert();
+    hideElement('#spinnerJS');
+    showElement(alertId);
   }
-}
 
-async function fetchLocationByLatLon(lat, lon) {
-  const url = 'https://api.openweathermap.org/geo/1.0/reverse?';
-  hideWeatherSection();
-  showSpinner();
-
-  try {
-    const { data } = await axios.get(url, {
-      params: {
-        lat,
-        lon,
-        appid: APIKEY,
-        limit: 1,
-      },
-    });
-    const { state = 'unknown', country, name } = data[0];
+  if (data.length > 0) {
+    const { state = 'unknown', country, lat, lon, name } = data[0];
     let locationDetails;
-
     if (state !== 'unknown') {
       locationDetails = `${state}, ${country}`;
     } else {
       locationDetails = country;
     }
     await fetchWeather(lat, lon, name, locationDetails);
+  } else {
+    changeElementText(
+      alertId,
+      `Nothing found while searching for ${city}. Please search by city name or city name,country code. Country codes are two digit ISO 3166 country codes.`
+    );
+    hideElement('#spinnerJS');
+    showElement(alertId);
+  }
+}
+
+async function fetchLocationByLatLon(lat, lon) {
+  const url = 'https://api.openweathermap.org/geo/1.0/reverse?';
+  const alertId = '#alertJS';
+  let data;
+
+  hideElement('#weatherSectionJS');
+  showElement('#spinnerJS');
+
+  try {
+    ({ data } = await axios.get(url, {
+      params: {
+        lat,
+        lon,
+        appid: APIKEY,
+        limit: 1,
+      },
+    }));
   } catch (error) {
     if (error.response.status === 404) {
-      changeAlertText(`Nothing found with this lat: ${lat} lon:${lon}`);
+      changeElementText(alertId, `Nothing found with this lat: ${lat} lon:${lon}`);
     } else if (error.response.status === 429) {
-      changeAlertText('Open Weather API has too many calls from this key. Try another key.');
+      changeElementText(alertId, 'Open Weather API has too many calls from this key. Try another key.');
     } else if (error.response.status === 401) {
-      changeAlertText('The Open Weather API key is not valid. Try another key.');
+      changeElementText(alertId, 'The Open Weather API key is not valid. Try another key.');
     } else {
-      changeAlertText(error.message);
+      changeElementText(alertId, error.message);
     }
-    hideSpinner();
-    showAlert();
+    hideElement('#spinnerJS');
+    showElement(alertId);
   }
+  const { state = 'unknown', country, name } = data[0];
+  let locationDetails;
+
+  if (state !== 'unknown') {
+    locationDetails = `${state}, ${country}`;
+  } else {
+    locationDetails = country;
+  }
+  await fetchWeather(lat, lon, name, locationDetails);
 }
 
 function containsNumbers(input) {
@@ -466,19 +405,18 @@ function getUserInput(event) {
       fetchLocationByCity(input);
     }
   } else {
-    changeAlertText('Please enter a city or zipcode');
-    showAlert();
+    changeElementText('#alertJS', 'Please enter a city or zipcode');
+    showElement('#alertJS');
   }
-
   document.querySelector('#userInputJS').value = '';
 }
 
 function setTemps(conversionFn, tempUnits) {
   const temps = document.querySelectorAll('.tempsJS');
-  temps.forEach((element) => {
+  temps.forEach((element, index) => {
     const temp = element.innerText.split('°')[0];
     const convertedTemp = conversionFn(temp);
-    element.innerHTML = `${convertedTemp}<sup>${tempUnits}</sup>`;
+    temps[index].innerHTML = `${convertedTemp}<sup>${tempUnits}</sup>`;
   });
 }
 
@@ -491,7 +429,7 @@ function convertToFahrenheit(temp) {
 }
 
 function toggleTempUnits() {
-  if (isWeatherSectionShown()) {
+  if (isElementShown('#weatherSectionJS')) {
     const toggle = document.querySelector('#tempUnitsSwitchJS');
     if (toggle.checked) {
       setTemps(convertToFahrenheit, '°F');
@@ -506,18 +444,21 @@ function geoSucess(position) {
 }
 
 function geoError() {
-  changeAlertText('We could not get your location. Please make sure to allow geolocation in your browser');
-  hideSpinner();
-  showAlert();
+  changeElementText(
+    '#alertJS',
+    'We could not get your location. Please make sure to allow geolocation in your browser'
+  );
+  hideElement('#spinnerJS');
+  showElement('#alertJS');
 }
 
 function getGeoLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(geoSucess, geoError);
   } else {
-    changeAlertText('Geolocation is not supported by this browser');
-    hideSpinner();
-    showAlert();
+    changeElementText('#alertJS', 'Geolocation is not supported by this browser');
+    hideElement('#spinnerJS');
+    showElement('#alertJS');
   }
 }
 

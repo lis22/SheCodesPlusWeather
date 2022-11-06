@@ -33,6 +33,7 @@ sup {
 }
 .alert {
   text-align: center;
+  display: none;
 }
 .card {
   box-shadow: 0 0 3Sem #dcb697;
@@ -86,9 +87,6 @@ sup {
   font-weight: 400;
   font-size: 1.1em;
 }
-.hide {
-  display: none;
-}
 
 .navbar-brand {
   font-size: 2em;
@@ -96,15 +94,15 @@ sup {
   font-weight: 500;
 }
 
-.show {
-  display: block;
-}
-
 .spinner {
   font-size: 2rem;
+  display: none;
 }
 
 .weatherDetails {
   font-weight: 500;
   font-size: 1.1em;
+}
+.weatherSection {
+  display: none;
 }

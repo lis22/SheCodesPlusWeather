@@ -51,35 +51,36 @@
           <label for="tempUnitsSwitchJS" class="form-check-label">Fahrenheit</label>
         </div>
       </div>
-      <div class="alert alert-danger hide" id="alertJS" role="alert"></div>
-      <div class="text-center spinner mt-5 show" id="spinnerJS">
+      <div class="alert alert-danger" id="alertJS" role="alert"></div>
+      <div class="text-center spinner mt-5" id="spinnerJS">
         <strong>Loading... </strong>
         <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
       </div>
-      <div class="hide" id="weatherSectionJS">
+      <div id="weatherSectionJS">
         <div class="currentForcast card mb-3 mt-4 text-center">
           <div class="card-header">Current Weather</div>
-
           <div class="card-body">
-            <div class="row d-flex justify-content-center">
-              <div class="col-md-3 col-lg-3">
+            <div class="row">
+              <div class="col-md-6 col-lg-4">
                 <img src="..." class="img-fluid" id="currentIconJS" alt="..." />
                 <h4 id="currentDescriptionJS" class="description"></h4>
               </div>
-
               <div class="col-md-6 col-lg-4 mt-4 mb-4">
                 <h1 id="currentCityJS" class="currentCity"></h1>
                 <h3 id="locationDetailsJS"></h3>
                 <h2 class="tempsJS circle mt-4" id="currentTempJS"></h2>
               </div>
-
-              <div class="col-md-3 col-lg-3 mt-4 mb-4">
-                <h4 id="currentTimeJS" class="currentDate date"></h4>
-                <h5>Sunrise: <span id="sunriseJS" class="date"></span></h5>
-                <h5>Sunset: <span id="sunsetJS" class="date"></span></h5>
-                <h5 id="humidityJS" class="mt-5"></h5>
-                <h5 id="cloudJS"></h5>
-                <h5 id="windspeedJS"></h5>
+              <div class="col-md-12 col-lg-4 mt-4 mb-4 d-md-flex flex-md-row flex-lg-column justify-content-md-evenly">
+                <div class="timeStats">
+                  <h4 id="currentTimeJS" class="currentDate date"></h4>
+                  <h5>Sunrise: <span id="sunriseJS" class="date"></span></h5>
+                  <h5>Sunset: <span id="sunsetJS" class="date"></span></h5>
+                </div>
+                <div class="weatherStats mt-lg-5">
+                  <h5>Humidity: <span id="humidityJS"></span></h5>
+                  <h5>Cloudiness: <span id="cloudJS"></span></h5>
+                  <h5>Wind Speed: <span id="windspeedJS"></span></h5>
+                </div>
               </div>
             </div>
           </div>
@@ -125,7 +126,6 @@
               </div>
             </div>
           </div>
-
           <div class="col">
             <div class="card text-center h-100 d-flex">
               <div class="card-header dayJS"></div>
@@ -139,7 +139,6 @@
               </div>
             </div>
           </div>
-
           <div class="col">
             <div class="card text-center h-100 d-flex">
               <div class="card-header dayJS"></div>
