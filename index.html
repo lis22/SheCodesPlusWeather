@@ -60,26 +60,32 @@
         <div class="currentForcast card text-center">
           <div class="card-header">Current Weather</div>
           <div class="card-body">
-            <div class="row align-items-center mb-3 mb-3">
-              <div class="col-md-6 col-lg-4">
-                <img src="..." class="img-fluid" id="currentIconJS" alt="..." />
-                <h4 id="currentDescriptionJS" class="description"></h4>
-              </div>
-              <div class="col-md-6 col-lg-4">
+            <div class="align-items-center row row-cols-1 row-cols-md-2 row-cols-lg-3">
+              <div class="col mb-2 mt-2 order-lg-2">
                 <h1 id="currentCityJS" class="currentCity"></h1>
                 <h3 id="locationDetailsJS"></h3>
-                <h2 class="tempsJS circle mt-3" id="currentTempJS"></h2>
               </div>
-              <div class="col-md-12 col-lg-4 d-md-flex flex-md-row flex-lg-column justify-content-md-around">
-                <div class="timeStats mt-4 mt-lg-1">
-                  <h4 id="currentTimeJS" class="currentDate date"></h4>
-                  <h5>Sunrise: <span id="sunriseJS" class="date"></span></h5>
-                  <h5>Sunset: <span id="sunsetJS" class="date"></span></h5>
-                </div>
-                <div class="weatherStats mt-4">
+              <div class="col order-md-2 order-lg-5 mb-3 mt-2">
+                <h2 class="tempsJS circle" id="currentTempJS"></h2>
+              </div>
+              <div class="col order-lg-1">
+                <img src="..." class="img-fluid icon" id="currentIconJS" alt="..." />
+              </div>
+              <div class="col order-md-3 order-lg-3 mb-2 mt-2">
+                <h4 id="currentDescriptionJS" class="currentDesc underline"></h4>
+              </div>
+              <div class="col order-md-5 mb-2 mt-2">
+                <div class="weatherStats">
                   <h5>Humidity: <span id="humidityJS"></span></h5>
                   <h5>Cloudiness: <span id="cloudJS"></span></h5>
                   <h5>Wind Speed: <span id="windspeedJS"></span></h5>
+                </div>
+              </div>
+              <div class="col order-md-4 order-lg-4 mb-2 mt-2">
+                <h4 id="currentTimeJS" class="currentDate date underline"></h4>
+                <div class="timeStats mt-3">
+                  <h5>Sunrise: <span id="sunriseJS" class="date"></span></h5>
+                  <h5>Sunset: <span id="sunsetJS" class="date"></span></h5>
                 </div>
               </div>
             </div>
